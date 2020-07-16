@@ -1,6 +1,6 @@
 import pandas as pd
 import os
-from Unicorn.Figures import nature_guidline_utils
+# from Unicorn.Figures import nature_guidline_utils
 import matplotlib.pyplot as plt
 import matplotlib
 import seaborn as sns
@@ -18,11 +18,12 @@ illustraitor_us=(102./255,45./255,145./255)
 labels = ['Train+test1 (IL)','Test2 (US)']
 
 params = {'axes.labelsize': 10,
-          'axes.titlesize':8,
-          'text.fontsize': 8,
+          'axes.titlesize':8,#'text.fontsize': 8,
           'legend.fontsize': 10,
           'xtick.labelsize': 8,
-          'ytick.labelsize': 8}
+          'ytick.labelsize': 8,
+          'lines.linewidth' : 1,
+          'lines.markersize' : 2}
 blue=(43./255,74./255,130./255)
 green=(47./255,142./255,52./255)
 pink=(191./255,64./255,140./255)
@@ -74,6 +75,7 @@ def params_for_subplots(ax,plot_asterix=False,remove_x=True):
 def plot_alpha_deciles_vs_pheontypes(ax_outer,pheno_df=None):
     if pheno_df is None:
         pheno_df= pd.read_csv(os.path.join(basepath, 'Phenotype-Alpha-Shannon__il__il_validation.csv'),index_col=0)
+    pheno_df = pheno_df.sort_values('alpha')
     pheno_df['alpha-decile']=pd.qcut(pheno_df['alpha'],10,labels=[str(x) for x in range(1,11)])
     pheno_df=pheno_df[['alpha-decile', 'age', 'bmi', 'hba1c', 'bt__fasting_glucose',
               'bt__fasting_triglycerides', 'bt__hdl_cholesterol', 'alpha']]
@@ -84,11 +86,11 @@ def plot_alpha_deciles_vs_pheontypes(ax_outer,pheno_df=None):
 
     phenotype='alpha'
     ax_alpha = plt.subplot(ax_all[pheno_df.shape[1]-2, 0])
-    ax_alpha = sns.boxplot(x=pheno_df['alpha-decile'], y=pheno_df[phenotype],
-                           color='white',fliersize=0,whis=[5, 95],width=0.6)
+    ax_alpha = sns.boxplot(x=pheno_df['alpha-decile'].values.astype(int), y=pheno_df[phenotype].values,
+                           color='white',fliersize=0,whis=[5, 95],width=0.5)
     ax_alpha.set_xlabel('Alpha diversity decile',labelpad=2)
     ax_alpha.set_ylabel('Alpha\ndiversity',labelpad=2)
-    ax_alpha.set_ylim([1,7])
+    # ax_alpha.set_ylim([1,7])
     ax_alpha.spines['right'].set_visible(False)
     ax_alpha.spines['top'].set_visible(False)
     ax_alpha.set_title('')
@@ -102,7 +104,7 @@ def plot_alpha_deciles_vs_pheontypes(ax_outer,pheno_df=None):
         decile_df=pheno_df[['alpha-decile', phenotype]].pivot_table(values=phenotype,
                index=pheno_df[['alpha-decile', phenotype]].index,
                columns='alpha-decile', aggfunc='first')
-        print decile_df[['1','10']].describe()
+        # print(decile_df[['1','10']].describe())
         all_stats = {}
         for j in range(10):
             all_stats[j] = [0]*10
@@ -133,9 +135,9 @@ def calcMeanWindow(vector,s=1000,jump=100):
     while current<len(vector):
         if ((current + s) > len(vector)):
             break
-        res.append(np.median(vector[current:current+s]))
+        res.append(np.mean(vector[current:current+s]))
         current = current + jump
-    res.append(np.median(vector[-s:]))
+    res.append(np.mean(vector[-s:]))
     return res
 
 
@@ -174,9 +176,9 @@ def plot_pheotype_trend(ax_outer):
 
             ax_p.scatter(window_phenotype,window_alpha,c=colors_rgb[j])
             ax_p.set_ylabel('Alpha\ndiversity',labelpad=2)
-            ax_p.set_yticks([5, 5.8] )
-            ax_p.set_yticklabels([5, 5.8] )
-            ax_p.set_ylim([5, 5.8] )
+            ax_p.set_yticks([4.9,5.5] )
+            ax_p.set_yticklabels([4.9,5.5] )
+            ax_p.set_ylim([4.9,5.5] )
             ax_p.set_xlabel(rename[phenotype],labelpad=2)
             params_for_subplots(ax_p,remove_x=False)
             if phenotype == 'bt__hdl_cholesterol' or phenotype =='age':
@@ -195,18 +197,29 @@ def plot_pheotype_trend(ax_outer):
     ax_p.set_axis_off()
     ax_p.legend(labels, loc=10, ncol=1, frameon=False)
 
+def m2inch(value,unit='mm'):
+    if unit=='cm':
+        return value/2.54
+    if unit=='mm':
+        return value/10/2.54
+
+def two_columns():
+    return m2inch(183)
+
+def full_page():
+    return m2inch(247)
 
 def plot_two_parts():
     outer_grid = gridspec.GridSpec(1, 2, width_ratios=[0.5, 0.5])
     outer_grid.update(wspace=0.5)
-    plt.figure(figsize=(nature_guidline_utils.two_columns(),
-                               nature_guidline_utils.full_page()), dpi=300)
+    plt.figure(figsize=(two_columns(),
+                               full_page()), dpi=300)
     ax__a = outer_grid[0, 0]
     ax__b = outer_grid[0, 1]
     plot_alpha_deciles_vs_pheontypes(ax__a)
     plot_pheotype_trend(ax__b)
-    plt.savefig(os.path.join(FIGURES_DIR, 'figure2_median.pdf'), bbox_inches='tight', format='pdf')
-    plt.savefig(os.path.join(FIGURES_DIR, 'figure2_median.png'), bbox_inches='tight', format='png')
+    plt.savefig(os.path.join(FIGURES_DIR, 'figure2.pdf'), bbox_inches='tight', format='pdf')
+    plt.savefig(os.path.join(FIGURES_DIR, 'figure2.png'), bbox_inches='tight', format='png')
 if __name__ == '__main__':
     plot_two_parts()
     # plot_pheotype_trend()
