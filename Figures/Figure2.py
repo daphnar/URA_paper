@@ -8,6 +8,7 @@ from scipy.stats import ranksums,ks_2samp,pearsonr
 from mne.stats import fdr_correction
 import numpy as np
 import matplotlib.gridspec as gridspec
+from scipy.stats import gaussian_kde
 
 sns.set_style("ticks", {'axes.edgecolor': 'black'})
 # pd.set_option('display.width', 1000)
@@ -35,8 +36,10 @@ colors_rgb = [(np.array(illustraitor_il)*9+np.array(illustraitor_il_validation))
               illustraitor_us]
 
 matplotlib.rcParams.update(params)
-basepath='/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/Analyses/Alpha-Diversity'
-FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/figures'
+basepath='/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/Cohort_Paper/Analyses/Alpha-Diversity'
+# FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/figures'
+FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/Cohort_Paper/revision_Analyses/figures'
+
 
 limits = {'age':[20,80],
           'bmi':[20,40],
@@ -90,7 +93,9 @@ def plot_alpha_deciles_vs_pheontypes(ax_outer,pheno_df=None):
                            color='white',fliersize=0,whis=[5, 95],width=0.5)
     ax_alpha.set_xlabel('Alpha diversity decile',labelpad=2)
     ax_alpha.set_ylabel('Alpha\ndiversity',labelpad=2)
-    # ax_alpha.set_ylim([1,7])
+    ax_alpha.set_ylim([1,7])
+    ax_alpha.set_yticks([1,4, 7])
+    ax_alpha.set_yticklabels([1, 4, 7])
     ax_alpha.spines['right'].set_visible(False)
     ax_alpha.spines['top'].set_visible(False)
     ax_alpha.set_title('')
@@ -143,7 +148,7 @@ def calcMeanWindow(vector,s=1000,jump=100):
 
 def plot_pheotype_trend(ax_outer):
     s = 1000
-    ax_all = gridspec.GridSpecFromSubplotSpec(7, 1, ax_outer, hspace=0.55)
+    ax_all = gridspec.GridSpecFromSubplotSpec(7, 1, ax_outer,hspace=0.55)# hspace=0.55
     ax_b = plt.subplot(ax_all[0, 0])
     for j,dataset in enumerate(['il__il_validation','us']):
         pheno_df= pd.read_csv(os.path.join(basepath, 'Phenotype-Alpha-Shannon__%s.csv'%dataset),index_col=0)
@@ -171,20 +176,41 @@ def plot_pheotype_trend(ax_outer):
             r,p=pearsonr(pheno_sorted_df[phenotype],pheno_sorted_df['alpha'])
             phenotype_alpha_correlations.append(r)
             pvalues.append(p)
+            outlier_high_alpha=pheno_sorted_df['alpha'].mean()+2*pheno_sorted_df['alpha'].std()
+            # outlier_low_alpha = pheno_sorted_df['alpha'].mean() - 2 * pheno_sorted_df['alpha'].std()
+            # non_outlier_pheno = pheno_sorted_df.loc[(pheno_sorted_df['alpha']<=outlier_high_alpha) & \
+            #                                         (pheno_sorted_df['alpha'] >=outlier_low_alpha)]
+            # ax_p.scatter(non_outlier_pheno[phenotype],non_outlier_pheno['alpha'],c='gray',marker='.',alpha=0.5)
+            x = pheno_sorted_df[phenotype].reset_index()[phenotype].values
+            y = pheno_sorted_df['alpha'].reset_index()['alpha'].values
+            y = y+np.random.random(y.shape[0])/100
+            xy = np.vstack([x, y])
+            z = gaussian_kde(xy)(xy)
+            print('yey %s'%phenotype)
+            idx = z.argsort()
+            x, y, z = x[idx], y[idx], z[idx]
+            res = ax_p.scatter(x, y, c=z, cmap=plt.cm.get_cmap('gray'), s=1, edgecolor='',alpha=0.3)
+            #cbar = plt.colorbar(res, shrink=1.15, pad=0.025)#, ticks=[0.0002, 0.0025]
+
             ax_p.plot(window_phenotype,window_alpha,c=colors_rgb[j])
             ax_p.autoscale(enable=True, axis='x', tight=True)
 
-            ax_p.scatter(window_phenotype,window_alpha,c=colors_rgb[j])
+            ax_p.scatter(window_phenotype,window_alpha,c=colors_rgb[j], edgecolor='',s=3)
             ax_p.set_ylabel('Alpha\ndiversity',labelpad=2)
-            ax_p.set_yticks([4.9,5.5] )
-            ax_p.set_yticklabels([4.9,5.5] )
-            ax_p.set_ylim([4.9,5.5] )
+            # ax_p.set_yticks([4.9,5.5] )
+            # ax_p.set_yticklabels([4.9,5.5] )
+            # ax_p.set_ylim([4.9,5.5] )
+            #ax_p.set_yticklabels([2,4.5,7])
+            ax_p.set_yticks([1,4,7])
+            ax_p.set_ylim([1, 7])
+            ax_p.set_yticklabels([1,4,7])
             ax_p.set_xlabel(rename[phenotype],labelpad=2)
             params_for_subplots(ax_p,remove_x=False)
-            if phenotype == 'bt__hdl_cholesterol' or phenotype =='age':
-                proportion_x = ax_p.get_xlim()[0] + (ax_p.get_xlim()[1] - ax_p.get_xlim()[0]) * 0.02
-            else:
-                proportion_x = ax_p.get_xlim()[0] + (ax_p.get_xlim()[1] - ax_p.get_xlim()[0]) * 0.7
+            # if phenotype == 'bt__hdl_cholesterol' or phenotype =='age':
+            #     proportion_x = ax_p.get_xlim()[0] + (ax_p.get_xlim()[1] - ax_p.get_xlim()[0]) * 0.02
+            # else:
+            #     proportion_xroportion_x = ax_p.get_xlim()[0] + (ax_p.get_xlim()[1] - ax_p.get_xlim()[0]) * 0.7
+            proportion_x = ax_p.get_xlim()[0] + (ax_p.get_xlim()[1] - ax_p.get_xlim()[0])
             proportion_y = ax_p.get_ylim()[0] + (ax_p.get_ylim()[1] - ax_p.get_ylim()[0]) * 0.6
 
             if dataset=='il__il_validation':
@@ -218,8 +244,8 @@ def plot_two_parts():
     ax__b = outer_grid[0, 1]
     plot_alpha_deciles_vs_pheontypes(ax__a)
     plot_pheotype_trend(ax__b)
-    plt.savefig(os.path.join(FIGURES_DIR, 'figure2.pdf'), bbox_inches='tight', format='pdf')
-    plt.savefig(os.path.join(FIGURES_DIR, 'figure2.png'), bbox_inches='tight', format='png')
+    plt.savefig(os.path.join(FIGURES_DIR, 'figure2_revision.pdf'), bbox_inches='tight', format='pdf')
+    plt.savefig(os.path.join(FIGURES_DIR, 'figure2_revision.png'), bbox_inches='tight', format='png')
 if __name__ == '__main__':
     plot_two_parts()
     # plot_pheotype_trend()
