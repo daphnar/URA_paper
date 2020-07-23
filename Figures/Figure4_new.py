@@ -4,16 +4,19 @@ import numpy as np
 import pandas as pd
 import os
 import matplotlib as mpl
-from Unicorn.Figures import nature_guidline_utils
+#from Unicorn.Figures import nature_guidline_utils
 from mne.stats import fdr_correction
 from dark import cmap_map
 from matplotlib.colors import ListedColormap,LinearSegmentedColormap
 from scipy.stats import gaussian_kde
 from sklearn.metrics import r2_score
+
+from URA_paper.Figures import nature_guidline_utils
+
 sns.set_style("ticks", {'axes.edgecolor': 'black'})
 pd.set_option('display.width', 1000)
 np.set_printoptions(precision=4, linewidth=200)
-FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/figures'
+FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/Cohort_Paper/revision_Analyses/figures'
 params = {
     'axes.labelsize': 10,
     'font.size': 10,
@@ -152,9 +155,12 @@ plt.yticks([0,10,20,30])
 axa__quantitive_phenotypes.spines['bottom'].set_position('zero')
 axa__quantitive_phenotypes.set_xlim(ind.min()-0.5,ind.max()+0.5)
 plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
-axa__quantitive_phenotypes.tick_params(direction="outward",top='off',right='off',pad=0,labelsize=fontsize)
-axa__quantitive_phenotypes.spines['right'].set_visible(False)
-axa__quantitive_phenotypes.spines['top'].set_visible(False)
+# axa__quantitive_phenotypes.spines['right'].set_visible(False)
+# axa__quantitive_phenotypes.spines['top'].set_visible(False)
+axa__quantitive_phenotypes.tick_params(top='off',right='off',pad=0,labelsize=fontsize)
+axa__quantitive_phenotypes.yaxis.set_ticks_position('left')
+axa__quantitive_phenotypes.xaxis.set_ticks_position('bottom')
+sns.despine(ax=axa__quantitive_phenotypes)
 plt.ylabel('$R^{2}$ (%)')
 plt.xlabel('')
 
@@ -176,9 +182,11 @@ estimation.plot.bar(yerr=yerr,ax = axb__binary_phenotypes,
 # axb__binary_phenotypes.bar(ind,phenotypes['auc'], yerr=phenotypes['stdev'], ecolor='black',
 #        zorder=1,color=two_colors[0],align='center')
 plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
-axb__binary_phenotypes.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
 axb__binary_phenotypes.spines['right'].set_visible(False)
 axb__binary_phenotypes.spines['top'].set_visible(False)
+axb__binary_phenotypes.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+axb__binary_phenotypes.yaxis.set_ticks_position('left')
+axb__binary_phenotypes.xaxis.set_ticks_position('bottom')
 plt.ylabel('AUC')
 plt.xlabel('')
 plt.ylim(0.5,1)
@@ -267,7 +275,9 @@ plt.xlim(-2,40)
 plt.ylim(-0.5,2.5)
 axc__hba1c_bmi_bar.spines['left'].set_position('zero')
 
-axc__hba1c_bmi_bar.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+axc__hba1c_bmi_bar.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+axc__hba1c_bmi_bar.yaxis.set_ticks_position('left')
+axc__hba1c_bmi_bar.xaxis.set_ticks_position('bottom')
 axc__hba1c_bmi_bar.spines['right'].set_visible(False)
 axc__hba1c_bmi_bar.spines['top'].set_visible(False)
 
@@ -285,8 +295,8 @@ axc__hba1c_bmi_legend.tick_params(labelbottom='off', labelleft='off')
 plt.sca(ax__age_scatter)
 plt.text(-.63, 1.1, 'c', ha='center', va='center', transform=ax__age_scatter.transAxes, fontsize=16)
 age_scatter_df = pd.read_csv(os.path.join(FIGURES_DIR,'Figures - age_xy_scatter.csv'))
-x = age_scatter_df['x']
-y = age_scatter_df['y']
+x = age_scatter_df['x\n']
+y = age_scatter_df['y\n']
 xy = np.vstack([x,y])
 z = gaussian_kde(xy)(xy)
 idx = z.argsort()
@@ -297,17 +307,20 @@ ax__age_scatter.annotate('$R^{2}$=%.2f'%r_square,(12,78),fontsize=8)
 cbar = plt.colorbar(res,ticks=[0.0002,  0.0025],shrink=1.15,pad=0.025)
 cbar.ax.tick_params(axis='both', which='major', pad=1)
 cbar.outline.set_visible(False)
-
 params = {'mathtext.default': 'regular' }
 plt.rcParams.update(params)
 cbar.ax.set_yticklabels(['$2x10^{-4}$', '$2.5x10^{-3}$'])
 # plt.tick_params(labelleft='off')
 # ax__age_scatter.scatter(age_scatter_df['x'],age_scatter_df['y'],color=colors_rgb[0],s=2)
-ax__age_scatter.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+ax__age_scatter.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+ax__age_scatter.yaxis.set_ticks_position('left')
+ax__age_scatter.xaxis.set_ticks_position('bottom')
 ax__age_scatter.spines['right'].set_visible(False)
 ax__age_scatter.spines['top'].set_visible(False)
-ax__age_scatter.set_yticks(([30,50,70]))
+# ax__age_scatter.set_yticks(([30,50,70]))
+ax__age_scatter.set_yticks(([10,30,50,70,90]))
 ax__age_scatter.set_xticks(([10,30,50,70,90]))
+ax__age_scatter.plot([10,30,50,70,90],[10,30,50,70,90],'k',linewidth=0.5)
 plt.ylabel('Predicted age')
 plt.xlabel('Actual age')
 
@@ -321,7 +334,9 @@ ax__age_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pea
 saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']] = saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']].mul(100)
 ax__age_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pearson_linear'],
                              yerr=saturation_df['mean_std_linear'],color=two_colors[1])
-ax__age_saturation.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+ax__age_saturation.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+ax__age_saturation.yaxis.set_ticks_position('left')
+ax__age_saturation.xaxis.set_ticks_position('bottom')
 ax__age_saturation.spines['right'].set_visible(False)
 ax__age_saturation.spines['top'].set_visible(False)
 ax__age_saturation.set_xlim([0,10500])
@@ -350,13 +365,17 @@ cbar = plt.colorbar(res,ticks=[0.1, 0.5, 0.9],shrink=1.15,pad=0.025)
 cbar.ax.tick_params(axis='both', which='major', pad=1)
 cbar.outline.set_visible(False)
 
-ax__hba1c_scatter.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+ax__hba1c_scatter.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+ax__hba1c_scatter.yaxis.set_ticks_position('left')
+ax__hba1c_scatter.xaxis.set_ticks_position('bottom')
 ax__hba1c_scatter.spines['right'].set_visible(False)
 ax__hba1c_scatter.spines['top'].set_visible(False)
 plt.ylabel('Predicted\nHbA1C%')
 plt.xlabel('Actual HbA1C%')
 ax__hba1c_scatter.set_xticks([2,4,6,8,10])
-ax__hba1c_scatter.set_yticks([4.5,5.5,6.5,7.5])
+ax__hba1c_scatter.set_yticks([2,4,6,8,10])
+ax__hba1c_scatter.plot([2,4,6,8,10],[2,4,6,8,10],'k',linewidth=0.5)
+#ax__hba1c_scatter.set_yticks([4.5,5.5,6.5,7.5])
 plt.sca(ax__bmi_scatter)
 plt.text(-.3, 1.1, 'e', ha='center', va='center', transform=ax__bmi_scatter.transAxes, fontsize=16)
 bmi_scatter_df = pd.read_csv(os.path.join(FIGURES_DIR,'Figures - bmi_xy_scatter.csv'))
@@ -373,12 +392,15 @@ ax__bmi_scatter.annotate('$R^{2}$=%.2f'%r_square,(10.5,35),fontsize=8)
 cbar = plt.colorbar(res,ticks=[0.002,0.01,0.018],shrink=1.15,pad=0.025)
 cbar.ax.tick_params(axis='both', which='major', pad=1)
 cbar.outline.set_visible(False)
-ax__bmi_scatter.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+ax__bmi_scatter.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+ax__bmi_scatter.yaxis.set_ticks_position('left')
+ax__bmi_scatter.xaxis.set_ticks_position('bottom')
 ax__bmi_scatter.spines['right'].set_visible(False)
 ax__bmi_scatter.spines['top'].set_visible(False)
 ax__bmi_scatter.set_xticks([10,20,30,40,50])
-ax__bmi_scatter.set_yticks([20,25,30,35])
-
+#ax__bmi_scatter.set_yticks([20,25,30,35])
+ax__bmi_scatter.set_yticks([10,20,30,40,50])
+ax__bmi_scatter.plot([10,20,30,40,50],[10,20,30,40,50],'k',linewidth='0.5')
 plt.ylabel('Predicted BMI')
 plt.xlabel('Actual BMI')
 
@@ -392,7 +414,9 @@ ax__hba1c_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_p
 saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']] = saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']].mul(100)
 ax__hba1c_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pearson_linear'],
                              yerr=saturation_df['mean_std_linear'],color=two_colors[1])
-ax__hba1c_saturation.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+ax__hba1c_saturation.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+ax__hba1c_saturation.yaxis.set_ticks_position('left')
+ax__hba1c_saturation.xaxis.set_ticks_position('bottom')
 ax__hba1c_saturation.spines['right'].set_visible(False)
 ax__hba1c_saturation.spines['top'].set_visible(False)
 ax__hba1c_saturation.set_xlim([0,8500])
@@ -412,7 +436,9 @@ ax__bmi_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pea
 saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']] = saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']].mul(100)
 ax__bmi_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pearson_linear'],
                              yerr=saturation_df['mean_std_linear'],color=two_colors[1])
-ax__bmi_saturation.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+ax__bmi_saturation.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+ax__bmi_saturation.yaxis.set_ticks_position('left')
+ax__bmi_saturation.xaxis.set_ticks_position('bottom')
 ax__bmi_saturation.spines['right'].set_visible(False)
 ax__bmi_saturation.spines['top'].set_visible(False)
 ax__bmi_saturation.set_xlim([0,10500])
