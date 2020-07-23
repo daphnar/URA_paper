@@ -1,0 +1,92 @@
+[global_parameters]
+    base_path = /net/mraid08/export/jafar/Microbiome/Analyses/Unicorn
+    databases_path = ${base_path}/URA_DBs
+    sub_path = SegataKnown
+    path = ${databases_path}/${sub_path}
+    qp_base_dir = ${path}/jobs
+    bowtie_path = /net/mraid08/export/genie/Bin/Bowtie/bowtie2-2.3.4.2
+    info_path = ${path}/fict_info
+
+[run_pipeline]
+    stage1output = ${global_parameters:path}/doneIndexing.txt
+    output_dir = ${global_parameters:path}
+    representatives = ${output_dir}/reconstructed_REPRESENTATIVE.txt
+    genomes_dir = ${global_parameters:base_path}/Bowtie/Segata/RenamedRepresentativeGenomes
+    all_large_or_new_sgbs = ''
+    #genomes_dir = ${global_parameters:base_path}/AbundanceEstimation/CoreRegions/collectedCores
+    #all_large_or_new_sgbs = ${global_parameters:base_path}/AbundanceEstimation/Abundances/AllLargeOrNewGenusSGBs.csv
+    qp_base_dir = ${global_parameters:qp_base_dir}
+    score_output = ${unite_fict_maps:scores_path}
+
+[build_representatives]
+    path = ${global_parameters:base_path}/Segata
+    qp_base_dir = ${global_parameters:qp_base_dir}/jobs
+    output_dir = ${global_parameters:path}
+    representatives = ${run_pipeline:output_dir}
+    genomes_dir = ${run_pipeline:genomes_dir}
+    all_large_or_new_sgbs = ${run_pipeline:all_large_or_new_sgbs}
+    #mode = getTopAbundantSGBs
+    output_fasta = ${output_dir}/SegataIndex.fa
+    SGBdescription=${path}/SupplementaryTable8-SGBsDescription.csv
+    output_cores_dir = ${output_dir}/coreFasta
+    chunksize=200
+
+[build_bowtie]
+    qp_base_dir = ${global_parameters:qp_base_dir}
+    threads = 10
+    offrate = 3
+    bowtie_path = ${global_parameters:bowtie_path}
+    bowtie_exe= ${bowtie_path}/bowtie2-build
+    path = ${global_parameters:path}
+    f_united_fastas = ${path}
+    input_index = ${build_representatives:output_fasta}
+    ind_path = ${path}/bowtie_index
+    ind_name = index
+
+[make_fict_reads]
+    qp_base_dir = ${global_parameters:qp_base_dir}
+    path = ${global_parameters:path}
+    singles_path = ${build_representatives:output_cores_dir}
+    f_genome_list = ${build_representatives:representatives_output}
+    read_len = 75
+    fict_path = ${path}/fict_reads_${read_len}
+    num_make_per_th = 50
+    chunk_size = ${run_pipeline:chunk_size}
+    info_path = ${global_parameters:info_path}
+
+[map_fict_reads]
+    qp_base_dir = ${global_parameters:qp_base_dir}
+    read_len = ${make_fict_reads:read_len}
+    path = ${global_parameters:path}
+    fict_path = ${make_fict_reads:fict_path}
+    map_res_path = ${path}/map_fict_${read_len}
+    num_maps_per_th = 1
+    bowtie_path = ${build_bowtie:bowtie_path}
+    bowtie_exe = ${bowtie_path}/bowtie2
+    ind_path = ${build_bowtie:ind_path}
+    ind_name = ${build_bowtie:ind_name}
+
+[analyse_fict_maps]
+    qp_base_dir = ${global_parameters:qp_base_dir}
+    num_maps_per_th = 1
+    path = ${global_parameters:path}
+    map_path = ${map_fict_reads:map_res_path}
+    bowtie_endings = *.sam
+    base_part_len = 100
+    out_path = ${global_parameters:info_path}
+
+[remove_intermediate_files]
+    fict_files = ${make_fict_reads:fict_path}
+    map_files = ${map_fict_reads:map_res_path}
+
+[unite_fict_maps]
+    qp_base_dir = ${global_parameters:qp_base_dir}
+    num_scores_per_th = 1
+    path = ${global_parameters:path}
+    strains_info_path = ${path}/fict_info
+    scores_path = ${path}/scores
+    bins_dict_path = ${scores_path}/dict_bins_%s.pkl
+    abundance_path = ${path}/real_full/abundances
+    scores_dict_path = ${scores_path}/dict_scores_%s.pkl
+    numberOfGenomes = 4930
+    chunk_size = 500
