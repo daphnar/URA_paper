@@ -9,8 +9,11 @@ import numpy
 import configparser
 
 def createBinsAndScores(st,unite_fict_maps):
-    if not os.path.exists(unite_fict_maps['scores_path']):
-        os.makedirs(unite_fict_maps['scores_path'])
+    try:
+        if not os.path.exists(unite_fict_maps['scores_path']):
+            os.makedirs(unite_fict_maps['scores_path'])
+    except FileExistsError:
+        print('WTF')
     dictOutput=os.path.join(unite_fict_maps['bins_dict_path']%st)
     scoresOuput=os.path.join(unite_fict_maps['scores_dict_path']%st)
     redo = False

@@ -35,7 +35,7 @@ def add_group( ID, reads ):
             print ("WTF score went up")
         if score == 0:
             pos1 = aligned_id.find('_c_')
-            contigs.append ( int(aligned_id[pos1 + 3:] ))
+            contigs.append ( int(aligned_id[pos1 + 3:].split('_')[0] ))
             ids.append( aligned_id[:pos1])
             poses.append( read.reference_start )
             grps.append( aligned_group )
@@ -105,7 +105,7 @@ def add_stats_entry( stats, start_pos, previous_id ):
     stats = pandas.DataFrame(stats, columns=['type', 'grps', 'IDs', 'contigs', 'poses'])
     pos1 = previous_id.find('_c_')
     pos2 = previous_id.find('|pos')
-    contig = int(previous_id[pos1 + 3:pos2])
+    contig = int(previous_id[pos1 + 3:pos2].split('_')[0])
     # id = previous_id[:pos1] + previous_id[pos2:previous_id.find('|')]
     id = previous_id[:pos1]
     end_pos = int(previous_id[previous_id.find("|pos") + 4:])

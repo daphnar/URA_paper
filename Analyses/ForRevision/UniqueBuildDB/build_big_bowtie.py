@@ -1,8 +1,8 @@
 import os
+import subprocess
 import time
-from SegalQueue.qp import qp, fakeqp
-from addloglevels import sethandlers
-import commands
+from LabQueue.qp import qp, fakeqp
+from LabUtils.addloglevels import sethandlers
 import configparser
 def build_index( ind_path,input_index,bowtie_exe,offrate,threads,ind_name):
 
@@ -11,13 +11,11 @@ def build_index( ind_path,input_index,bowtie_exe,offrate,threads,ind_name):
                                                              ind_path, ind_name)
     print ("building")
     print ("%s" % buildCommand )
-    status,output = commands.getstatusoutput(buildCommand)
-    if status!=0:
-        print output
-        print "status:", status
-        raise "failed"
-    else:
-        print output
+    status, output = subprocess.getstatusoutput(buildCommand)
+    if status != 0:
+        print(output)
+        print("status:", status)
+        raise Exception("failed")
     return
 
 def run(configFile):
@@ -28,13 +26,12 @@ def run(configFile):
     basedir = build_representatives['qp_base_dir']
     if not os.path.exists(basedir):
         os.makedirs(basedir)
-    sethandlers()
+    #sethandlers()
     os.chdir(basedir)
     print ("Starting")
 
-    print time.ctime()
-    with fakeqp(jobname='bowtie_build', q=['himem7.q'], tryrerun=False, mem_def ='20G',trds_def=eval(build_representatives['threads']), \
-                qworker='~/Develop/Python/lib/SegalQueue/qworker.py') as q:
+    print (time.ctime())
+    with fakeqp(jobname='build', q=['himem7.q']) as q:
         q.startpermanentrun()
         ind_path = build_representatives['ind_path']
         input_index = build_representatives['input_index']
@@ -49,7 +46,7 @@ def run(configFile):
         waiton = [ q.method( build_index, ( ind_path,input_index,bowtie_exe,offrate,threads,ind_name) ) ]
         print ("job sent")
         q.wait(waiton)
-    print time.ctime()
+    print(time.ctime())
 
 if __name__=="__main__":
     run()

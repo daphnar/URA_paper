@@ -1,29 +1,26 @@
 import numpy as np
-# # from Unicorn.build_pan_genome.buildUniqueDB.createDistantConfigFile import createDistantConfigFile
-# from URA_paper.Analyses.ForRevision.UniqueBuildDB import build_big_bowtie, \
-#     buildRepresentatives, make_fict_reads, map_fict_reads,analyse_fict_maps,unite_fict_maps
 import time
 import configparser
 import os
 import pandas as pd
 import glob
 from LabQueue.qp import qp, fakeqp
+from LabMB_URA_Build.LabMB_URA_Build.Build_URA_pipeline import make_fict_reads, map_fict_reads, analyse_fict_maps, \
+    unite_fict_maps, buildRepresentatives, build_big_bowtie, EatOrKeepSmallRepresentatives
+from LabMB_URA_Build.LabMB_URA_Build.Build_URA_pipeline.createDistantConfigFile import createDistantConfigFile
 from LabUtils.addloglevels import sethandlers
 
-from URA_paper.Analyses.ForRevision.UniqueBuildDB import make_fict_reads, map_fict_reads, analyse_fict_maps, \
-    unite_fict_maps
-from URA_paper.Analyses.ForRevision.UniqueBuildDB.createDistantConfigFile import createDistantConfigFile
 
 def getAllSGBs(representatives,genomes_dir,all_large_or_new_sgbs):
     if not os.path.exists(representatives):
         sgbs={}
-        keepSGBs=pd.Series.from_csv(all_large_or_new_sgbs).values
+        keepSGBs=pd.read_csv(all_large_or_new_sgbs,index_col=0,header=None).index.values
         for fastafile in glob.glob(os.path.join(genomes_dir,'*.fa')):
             sgb=os.path.basename(fastafile).split('_')[1]
             if int(sgb) in keepSGBs:
                 rep=os.path.basename(fastafile).split(sgb+'_')[1][:-3]
                 sgbs[rep]=sgb
-        pd.Series(sgbs).to_csv(representatives,sep='\t')
+        pd.Series(sgbs).to_csv(representatives,sep='\t',header=False)
     representatives_df = pd.read_table(representatives, header=None)
     representatives_df.columns = ['nameOfFile', 'SGB']
     return representatives_df['SGB']
@@ -52,6 +49,8 @@ def runOnSGBs(configFile):
     config = configparser.ConfigParser(interpolation=configparser.ExtendedInterpolation())
     config.read(configFile)
     run_pipeline = config['run_pipeline']
+    if not os.path.exists(run_pipeline['representatives']):
+            EatOrKeepSmallRepresentatives.run(configFile)
     SelectedSGBs=getAllSGBs(run_pipeline['representatives'],
                run_pipeline['genomes_dir'],
                run_pipeline['all_large_or_new_sgbs'])
@@ -67,7 +66,7 @@ def runOnSGBs(configFile):
     sethandlers()
     os.chdir(basedir)
     print ("Starting")
-    with fakeqp(jobname='build', q=['himem7.q']) as q:
+    with qp(jobname='build', q=['himem7.q']) as q:
         q.startpermanentrun()
         waiton = []
         chucksize=50
@@ -75,6 +74,7 @@ def runOnSGBs(configFile):
         for chunkSGBsIDs in range(0,len(SelectedSGBs),chucksize):
             chunkSGBs=SelectedSGBs.loc[count*chucksize:chucksize*(count+1)-1]
             count+=1
+            waiton.append(q.method(runChuckOfSGBs, (chunkSGBs, configFile)))
         q.wait(waiton)
         print ("Done running on %s SGBs"%len(waiton))
     print ("Done", time.ctime())

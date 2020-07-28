@@ -1,7 +1,7 @@
 [global_parameters]
     base_path = /net/mraid08/export/jafar/Microbiome/Analyses/Unicorn
     databases_path = ${base_path}/URA_DBs
-    sub_path = SegataKnown
+    sub_path = SegataKnown_75
     path = ${databases_path}/${sub_path}
     qp_base_dir = ${path}/jobs
     bowtie_path = /net/mraid08/export/genie/Bin/Bowtie/bowtie2-2.3.4.2
@@ -10,13 +10,18 @@
 [run_pipeline]
     stage1output = ${global_parameters:path}/doneIndexing.txt
     output_dir = ${global_parameters:path}
-    representatives = ${output_dir}/reconstructed_REPRESENTATIVE.txt
+    representatives = ${output_dir}/KnownLargeOrNew_reconstructed_REPRESENTATIVE.txt
     genomes_dir = ${global_parameters:base_path}/Bowtie/Segata/RenamedRepresentativeGenomes
-    all_large_or_new_sgbs = ''
+    all_large_or_new_sgbs = ${LargeOrNewGenus:all_large_or_new_sgbs}
     #genomes_dir = ${global_parameters:base_path}/AbundanceEstimation/CoreRegions/collectedCores
     #all_large_or_new_sgbs = ${global_parameters:base_path}/AbundanceEstimation/Abundances/AllLargeOrNewGenusSGBs.csv
     qp_base_dir = ${global_parameters:qp_base_dir}
     score_output = ${unite_fict_maps:scores_path}
+
+[LargeOrNewGenus]
+    representatives = ${global_parameters:path}/known_reconstructed_REPRESENTATIVE.txt
+    SGBdescription = ${build_representatives:SGBdescription}
+    all_large_or_new_sgbs = ${global_parameters:path}/AllLargeOrNewSGBs_SegataKnwon.csv
 
 [build_representatives]
     path = ${global_parameters:base_path}/Segata
@@ -28,8 +33,9 @@
     #mode = getTopAbundantSGBs
     output_fasta = ${output_dir}/SegataIndex.fa
     SGBdescription=${path}/SupplementaryTable8-SGBsDescription.csv
-    output_cores_dir = ${output_dir}/coreFasta
-    chunksize=200
+    #output_cores_dir = ${output_dir}/coreFasta
+    output_cores_dir = ${genomes_dir}
+    chunksize=1500
 
 [build_bowtie]
     qp_base_dir = ${global_parameters:qp_base_dir}
