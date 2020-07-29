@@ -150,8 +150,8 @@ estimation.plot.bar(yerr=yerr,ax = axa__quantitive_phenotypes,
                               width=0.8)
 axa__quantitive_phenotypes.legend(frameon=False)#loc=10,
 plt.ylim(-10,40)
-axa__quantitive_phenotypes.spines['left'].set_bounds(0, 36.5)
-plt.yticks([0,10,20,30])
+axa__quantitive_phenotypes.spines['left'].set_bounds(0, 40)
+plt.yticks([0,10,20,30,40])
 axa__quantitive_phenotypes.spines['bottom'].set_position('zero')
 axa__quantitive_phenotypes.set_xlim(ind.min()-0.5,ind.max()+0.5)
 plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
