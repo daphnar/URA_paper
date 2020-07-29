@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import os
 import matplotlib as mpl
-from Unicorn.Figures import nature_guidline_utils
+from URA_paper.Figures import nature_guidline_utils
 from mne.stats import fdr_correction
 from dark import cmap_map
 from matplotlib.colors import ListedColormap,LinearSegmentedColormap
@@ -13,7 +13,7 @@ from sklearn.metrics import r2_score
 sns.set_style("ticks", {'axes.edgecolor': 'black'})
 pd.set_option('display.width', 1000)
 np.set_printoptions(precision=4, linewidth=200)
-FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/figures'
+FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/Cohort_Paper/revision_Analyses/figures'
 params = {
     'axes.labelsize': 10,
     'font.size': 10,
@@ -120,9 +120,10 @@ axa__quantitive_phenotypes.spines['bottom'].set_position('zero')
 axa__quantitive_phenotypes.spines['left'].set_bounds(0, 31)
 plt.yticks([0,10,20,30])
 plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
-axa__quantitive_phenotypes.tick_params(direction="outward",top='off',right='off',pad=0,labelsize=fontsize)
-axa__quantitive_phenotypes.spines['right'].set_visible(False)
-axa__quantitive_phenotypes.spines['top'].set_visible(False)
+axa__quantitive_phenotypes.tick_params(top='off',right='off',pad=0,labelsize=fontsize)
+axa__quantitive_phenotypes.yaxis.set_ticks_position('left')
+axa__quantitive_phenotypes.xaxis.set_ticks_position('bottom')
+sns.despine(ax=axa__quantitive_phenotypes)
 plt.ylabel('$R^{2}$ (%)')
 plt.xlabel('')
 # plt.ylim(0,31)
@@ -144,9 +145,13 @@ estimation.plot.bar(yerr=yerr,ax = axb__binary_phenotypes,
 # axb__binary_phenotypes.bar(ind,phenotypes['auc'], yerr=phenotypes['stdev'], ecolor='black',
 #        zorder=1,color=two_colors[0],align='center')
 plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
-axb__binary_phenotypes.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
 axb__binary_phenotypes.spines['right'].set_visible(False)
 axb__binary_phenotypes.spines['top'].set_visible(False)
+axb__binary_phenotypes.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+axb__binary_phenotypes.yaxis.set_ticks_position('left')
+axb__binary_phenotypes.xaxis.set_ticks_position('bottom')
+sns.despine(ax=axb__binary_phenotypes)
+
 plt.ylabel('AUC')
 plt.xlabel('')
 plt.ylim(0.5,1)

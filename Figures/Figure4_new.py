@@ -149,7 +149,7 @@ estimation.plot.bar(yerr=yerr,ax = axa__quantitive_phenotypes,
                               color=three_colors,legend=True,
                               width=0.8)
 axa__quantitive_phenotypes.legend(frameon=False)#loc=10,
-plt.ylim(-10,36.5)
+plt.ylim(-10,40)
 axa__quantitive_phenotypes.spines['left'].set_bounds(0, 36.5)
 plt.yticks([0,10,20,30])
 axa__quantitive_phenotypes.spines['bottom'].set_position('zero')
@@ -317,10 +317,11 @@ ax__age_scatter.yaxis.set_ticks_position('left')
 ax__age_scatter.xaxis.set_ticks_position('bottom')
 ax__age_scatter.spines['right'].set_visible(False)
 ax__age_scatter.spines['top'].set_visible(False)
-# ax__age_scatter.set_yticks(([30,50,70]))
-ax__age_scatter.set_yticks(([10,30,50,70,90]))
+#ax__age_scatter.set_yticks(([10,30,50,70,90]))
 ax__age_scatter.set_xticks(([10,30,50,70,90]))
 ax__age_scatter.plot([10,30,50,70,90],[10,30,50,70,90],'k',linewidth=0.5)
+ax__age_scatter.set_yticks(([30,50,70]))
+plt.ylim(30,80)
 plt.ylabel('Predicted age')
 plt.xlabel('Actual age')
 
@@ -361,7 +362,7 @@ x, y, z = x[idx], y[idx], z[idx]
 res = ax__hba1c_scatter.scatter(x,y, c=z, cmap=plt.cm.get_cmap('Blues_r'),s=2, edgecolor='')
 r_square=r2_score(x,y)
 ax__hba1c_scatter.annotate('$R^{2}$=%.2f'%r_square,(2.2,10),fontsize=8)
-cbar = plt.colorbar(res,ticks=[0.1, 0.5, 0'c'.9],shrink=1.15,pad=0.025)
+cbar = plt.colorbar(res,ticks=[0.1, 0.5, 0.9],shrink=1.15,pad=0.025)
 cbar.ax.tick_params(axis='both', which='major', pad=1)
 cbar.outline.set_visible(False)
 
@@ -375,7 +376,8 @@ plt.xlabel('Actual HbA1C%')
 ax__hba1c_scatter.set_xticks([2,4,6,8,10])
 ax__hba1c_scatter.set_yticks([2,4,6,8,10])
 ax__hba1c_scatter.plot([2,4,6,8,10],[2,4,6,8,10],'k',linewidth=0.5)
-#ax__hba1c_scatter.set_yticks([4.5,5.5,6.5,7.5])
+ax__hba1c_scatter.set_yticks([4.5,5.5,6.5,7.5])
+plt.ylim(4.5,8)
 plt.sca(ax__bmi_scatter)
 plt.text(-.3, 1.1, 'e', ha='center', va='center', transform=ax__bmi_scatter.transAxes, fontsize=16)
 bmi_scatter_df = pd.read_csv(os.path.join(FIGURES_DIR,'Figures - bmi_xy_scatter.csv'))
@@ -398,9 +400,10 @@ ax__bmi_scatter.xaxis.set_ticks_position('bottom')
 ax__bmi_scatter.spines['right'].set_visible(False)
 ax__bmi_scatter.spines['top'].set_visible(False)
 ax__bmi_scatter.set_xticks([10,20,30,40,50])
-#ax__bmi_scatter.set_yticks([20,25,30,35])
-ax__bmi_scatter.set_yticks([10,20,30,40,50])
+
 ax__bmi_scatter.plot([10,20,30,40,50],[10,20,30,40,50],'k',linewidth='0.5')
+ax__bmi_scatter.set_yticks([20,25,30,35])
+plt.ylim(20,37)
 plt.ylabel('Predicted BMI')
 plt.xlabel('Actual BMI')
 
@@ -409,7 +412,7 @@ plt.text(-0.2, 1.15, 'h', ha='center', va='center', transform=ax__hba1c_saturati
 saturation_df=pd.read_csv(os.path.join(FIGURES_DIR,'Figures - hba1c_saturation2.csv'))
 saturation_df.sort_values(by='cohort_size',inplace=True)
 saturation_df.loc[:,['mean_pearson','mean_std']] = saturation_df.loc[:,['mean_pearson','mean_std']].mul(100)
-ax__hba1c_saturation.errorbar(saturation_d'c'f['cohort_size'],saturation_df['mean_pearson'],
+ax__hba1c_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pearson'],
                              yerr=saturation_df['mean_std'],color=two_colors[0])
 saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']] = saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']].mul(100)
 ax__hba1c_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pearson_linear'],
@@ -434,7 +437,7 @@ saturation_df.loc[:,['mean_pearson','mean_std']] = saturation_df.loc[:,['mean_pe
 ax__bmi_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pearson'],
                              yerr=saturation_df['mean_std'],color=two_colors[0])
 saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']] = saturation_df.loc[:,['mean_pearson_linear','mean_std_linear']].mul(100)
-ax__bmi_saturation.errorbar(saturation_df['c''c''cohort_size'],saturation_df['mean_pearson_linear'],
+ax__bmi_saturation.errorbar(saturation_df['cohort_size'],saturation_df['mean_pearson_linear'],
                              yerr=saturation_df['mean_std_linear'],color=two_colors[1])
 ax__bmi_saturation.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
 ax__bmi_saturation.yaxis.set_ticks_position('left')
@@ -449,5 +452,5 @@ plt.xlabel('Sample size')
 plt.ylabel('BMI $R^{2}$ (%)')
 plt.ylim(0,17)
 # axf__hba1c_saturation.set_yticks([0,5,10,15,20])
-plt.savefig(os.path.join(FIGURES_DIR, 'figure4_colors.pdf'), bbox_inches='tight', format='pdf')
-plt.savefig(os.path.join(FIGURES_DIR, 'figure4_colors.png'), bbox_inches='tight', format='png')
+plt.savefig(os.path.join(FIGURES_DIR, 'figure4_new_ab.pdf'), bbox_inches='tight', format='pdf')
+plt.savefig(os.path.join(FIGURES_DIR, 'figure4_new_ab.png'), bbox_inches='tight', format='png')
