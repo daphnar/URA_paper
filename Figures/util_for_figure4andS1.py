@@ -9,11 +9,10 @@ phenotypes = ['age','bmi','hba1c',"bt__fasting_glucose","bt__fasting_triglycerid
 def model_quantitive_rename(df):
     return df.rename(index=str,columns={'mean_pearson':'pearson_linear','std_pearson':'stdev_linear'})
 
-def model_binary_rename(gender,df):
-    if gender != 'all':
-        return pd.DataFrame({'target':phenotypes})
-    return df.rename(index=str,columns={'auc':'auc_linear','stdev':'stdev_linear'})\
-        [['target','n','auc_linear','stdev_linear']]
+def model_binary_rename(df):
+    res = df.rename(index=str,columns={'auc':'auc_linear','stdev':'stdev_linear'})
+    res = res[res['gender']=='all']
+    return res[['target','n','auc_linear','stdev_linear']]
 
 def gender_quantitive_rename(gender, df):
     if gender=='all':
@@ -32,10 +31,12 @@ def gender_binary_rename(gender, df):
         new_df = df[['target','auc','stdev']]
     elif gender=='female':
         new_df = df.rename(index=str,columns={'auc':'pearson_female','stdev':'stdev_female'})\
-        [['target','pearson_female','stdev_female']]
+        .reset_index()[['target','pearson_female','stdev_female']]
+        new_df.loc[new_df.shape[0]]=['gender',0,0]
     elif gender=='male':
         new_df = df.rename(index=str,columns={'auc':'pearson_male','stdev':'stdev_male'}) \
-            [['target','pearson_male', 'stdev_male']]
+            .reset_index()[['target','pearson_male', 'stdev_male']]
+        new_df.loc[new_df.shape[0]]=['gender',0,0]
     return new_df
 
 def merger_quantitive():
@@ -52,7 +53,8 @@ def merger_binary():
     dfs=[]
     obj_xgboost = pd.read_csv(os.path.join(basepath,'classification_xgboostMB_phenotypes.csv'),index_col=0)
     for gender, df in obj_ridge.groupby('gender'):
-        dfs.append(model_binary_rename(gender,obj_ridge))
+        if gender=='all':
+            dfs.append(model_binary_rename(obj_ridge))
     for gender,df in obj_xgboost.groupby('gender'):
         dfs.append(gender_binary_rename(gender,df))
     merge_on_target(dfs,os.path.join(basepath, 'Figures - classification.csv'))
