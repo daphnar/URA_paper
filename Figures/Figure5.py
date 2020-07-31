@@ -171,7 +171,7 @@ for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
     if txt=='K. pneumoniae' or txt=='E. marmotae':
         plt.gca().annotate(it_text,
                            (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
-                            pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.031),
+                            pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.031),e_ax
                            fontsize=8)
     else:
         plt.gca().annotate(it_text,
