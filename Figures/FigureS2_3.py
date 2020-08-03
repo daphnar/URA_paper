@@ -27,7 +27,9 @@ params = {
 fontsize = 10
 plt.rcParams.update(params)
 
-rename = {
+rename = {'age':'Age',
+          'bmi':'BMI',
+          'hba1c':'HbA1C%',
           'bowel_movement_frequency':'Bowel movement',
           'bt__fasting_glucose':'Glucose',
           'bt__fasting_triglycerides':'Triglycerides',
@@ -48,15 +50,15 @@ rename = {
           'gender': 'Gender'
           }
 
-phenotypes = ["bt__fasting_glucose","bt__fasting_triglycerides",'bowel_movement_frequency',
+phenotypes = ['age','bmi','hba1c',"bt__fasting_glucose","bt__fasting_triglycerides",'bowel_movement_frequency',
               "bt__hdl_cholesterol","bt__cholesterol","bt__protein","bt__albumin","bt__sgot","bt__alkaline_phosphatase",
               "bt__tsh","bt__inr",'gender','currently_smokes','ever_smoked','type_2_diabetes']
-letters='abcdefghijklmno'
+letters='abcdefghijklmnopqr'
 for predictor in ['xgb','Ridge']:
     fig = plt.figure(figsize=(nature_guidline_utils.two_columns(),
                               nature_guidline_utils.full_page()), dpi=300)  # m2inch(165)
 
-    outer_grid = gridspec.GridSpec(5, 3, hspace=0.9, wspace=0.7)#, width_ratios=[1. / 3, 1. / 3, 1. / 3])
+    outer_grid = gridspec.GridSpec(6, 3, hspace=0.9, wspace=0.7)#, width_ratios=[1. / 3, 1. / 3, 1. / 3])
     for i,pheno in enumerate(phenotypes):
         print(pheno)
         ax = plt.subplot(outer_grid[i])
