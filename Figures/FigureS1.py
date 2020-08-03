@@ -26,7 +26,7 @@ params = {
 fontsize = 10
 plt.rcParams.update(params)
 fig = plt.figure(figsize=(nature_guidline_utils.two_columns(),
-                          nature_guidline_utils.full_page()*0.25), dpi=300)  # m2inch(165)
+                          nature_guidline_utils.full_page()*0.25*2), dpi=300)  # m2inch(165)
 
 import matplotlib.gridspec as gridspec
 
@@ -62,11 +62,15 @@ colors_rgb_bmi_hba1c = colors_rgb[:4]+[colors_rgb[-1]]
 
 outer_grid = gridspec.GridSpec(1,1)
 ax__ab = outer_grid[0,0]
-ab_grid = gridspec.GridSpecFromSubplotSpec(1,2, ax__ab, wspace=0.2, width_ratios=[17./21,4./21])
-axa__quantitive_phenotypes = plt.subplot(ab_grid[0,0])
+ab_grid = gridspec.GridSpecFromSubplotSpec(2,2, ax__ab, wspace=0.2, width_ratios=[17./21,4./21])
+axa__quantitive_phenotypes = plt.subplot(ab_grid[1,0])
 axa__quantitive_phenotypes.set_zorder(1)
-axb__binary_phenotypes = plt.subplot(ab_grid[0,1])
+axb__binary_phenotypes = plt.subplot(ab_grid[1,1])
 axb__binary_phenotypes.set_zorder(1)
+axc__quantitive_phenotypes = plt.subplot(ab_grid[0,0])
+axc__quantitive_phenotypes.set_zorder(1)
+#axd__binary_phenotypes = plt.subplot(ab_grid[0,1])
+#axd__binary_phenotypes.set_zorder(1)
 
 
 
@@ -95,7 +99,7 @@ rename = {'age':'Age',
           'gender': 'Gender'
           }
 plt.sca(axa__quantitive_phenotypes)
-plt.text(-.175, 1.1, 'a', ha='center', va='center', transform=axa__quantitive_phenotypes.transAxes, fontsize=16)
+plt.text(-.175, 1.1, 'c', ha='center', va='center', transform=axa__quantitive_phenotypes.transAxes, fontsize=16)
 correlations_df = pd.read_csv(os.path.join(FIGURES_DIR,'Figures - prediction_other_phenotypes.csv')).set_index('target')
 # phenotypes = correlations_df[['pearson','stdev']].dropna().sort_values(by='pearson',ascending=False).mul(100)
 phenotypes = correlations_df[['pearson','pearson_linear','stdev','stdev_linear']].dropna().sort_values(by='pearson',ascending=False).mul(100)
@@ -105,8 +109,6 @@ phenotypes=phenotypes.loc[phenotypes.index[phenotypes.index !='']]
 ind = np.array(range(len(phenotypes)))
 
 
-# axa__quantitive_phenotypes.bar(ind,phenotypes['pearson'],yerr=phenotypes['stdev'], ecolor='black',#edgecolor='none',
-#        zorder=1,color=colors_rgb[0],align='center')
 estimation = phenotypes[['GBDT','Ridge']]
 yerr = phenotypes[['std_xgboost','std_ridge']].T.values
 estimation.plot.bar(yerr=yerr,ax = axa__quantitive_phenotypes,
@@ -126,24 +128,22 @@ axa__quantitive_phenotypes.xaxis.set_ticks_position('bottom')
 sns.despine(ax=axa__quantitive_phenotypes)
 plt.ylabel('$R^{2}$ (%)')
 plt.xlabel('')
-# plt.ylim(0,31)
 
 
 plt.sca(axb__binary_phenotypes)
 correlations_df = pd.read_csv(os.path.join(FIGURES_DIR,'Figures - classification.csv')).set_index('target')
 phenotypes = correlations_df[['auc','auc_linear','stdev','stdev_linear']].dropna().sort_values(by='auc',ascending=False)
 phenotypes.index=phenotypes.index.map(lambda x: rename[x] if x in rename else '')#phenotypes.index.str.replace('bt__',"")
-plt.text(-.6, 1.1, 'b', ha='center', va='center', transform=axb__binary_phenotypes.transAxes, fontsize=16)
+plt.text(-.6, 1.1, 'd', ha='center', va='center', transform=axb__binary_phenotypes.transAxes, fontsize=16)
 ind = range(len(phenotypes))
 estimation = phenotypes[['auc','auc_linear']]
 yerr = phenotypes[['stdev','stdev_linear']].T.values
 estimation.plot.bar(yerr=yerr,ax = axb__binary_phenotypes,
-                              zorder=1,#edgecolor='none',
+                              zorder=1,
                               color=two_colors,legend=False,
                               width=0.8)
 
-# axb__binary_phenotypes.bar(ind,phenotypes['auc'], yerr=phenotypes['stdev'], ecolor='black',
-#        zorder=1,color=two_colors[0],align='center')
+
 plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
 axb__binary_phenotypes.spines['right'].set_visible(False)
 axb__binary_phenotypes.spines['top'].set_visible(False)
@@ -156,5 +156,84 @@ plt.ylabel('AUC')
 plt.xlabel('')
 plt.ylim(0.5,1)
 
-plt.savefig(os.path.join(FIGURES_DIR, 'figureS1.pdf'), bbox_inches='tight', format='pdf')
-plt.savefig(os.path.join(FIGURES_DIR, 'figureS1.png'), bbox_inches='tight', format='png')
+
+
+
+
+
+plt.sca(axc__quantitive_phenotypes)
+plt.text(-.175, 1.1, 'a', ha='center', va='center', transform=axc__quantitive_phenotypes.transAxes, fontsize=16)
+correlations_df = pd.read_csv(os.path.join(FIGURES_DIR,'compare_xgboostMB_Known.csv'),index_col=0)
+# phenotypes = correlations_df[['pearson','stdev']].dropna().sort_values(by='pearson',ascending=False).mul(100)
+phenotypes = correlations_df[['mean_pearson_Known','std_pearson_Known',
+'mean_pearson_mpa','std_pearson_mpa','mean_pearson_ura','std_pearson_ura']]\
+                              .dropna().sort_values(by='mean_pearson_ura',ascending=False).mul(100)
+phenotypes.columns = ['URA known NCBI','std_pearson_Known',
+'MetaPhlan','std_pearson_mpa','URA expanded reference','std_pearson_ura']
+phenotypes.index=phenotypes.index.map(lambda x: rename[x] if x in rename else '')#phenotypes.index.str.replace('bt__',"")
+phenotypes=phenotypes.loc[phenotypes.index[phenotypes.index !='']]
+ind = np.array(range(len(phenotypes)))
+
+
+# axa__quantitive_phenotypes.bar(ind,phenotypes['pearson'],yerr=phenotypes['stdev'], ecolor='black',#edgecolor='none',
+#        zorder=1,color=colors_rgb[0],align='center')
+estimation = phenotypes[['MetaPhlan','URA known NCBI','URA expanded reference']]
+yerr = phenotypes[['std_pearson_mpa','std_pearson_Known','std_pearson_ura']].T.values
+estimation.plot.bar(yerr=yerr,ax = axc__quantitive_phenotypes,
+                              zorder=1,#edgecolor='none',
+                              color=three_colors,legend=True,
+                              width=0.8)
+axc__quantitive_phenotypes.legend(frameon=False)#loc=10,
+
+axc__quantitive_phenotypes.set_xlim(ind.min()-0.5,ind.max()+0.5)
+axc__quantitive_phenotypes.spines['bottom'].set_position('zero')
+
+plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
+axc__quantitive_phenotypes.tick_params(top='off',right='off',pad=0,labelsize=fontsize)
+axc__quantitive_phenotypes.yaxis.set_ticks_position('left')
+axc__quantitive_phenotypes.xaxis.set_ticks_position('bottom')
+sns.despine(ax=axc__quantitive_phenotypes)
+plt.ylabel('$R^{2}$ (%)')
+plt.xlabel('')
+
+# plt.sca(axd__binary_phenotypes)
+# correlations_df = pd.read_csv(os.path.join(FIGURES_DIR,'Figures - classification.csv')).set_index('target')
+# phenotypes = correlations_df[['auc','stdev','pearson_male','stdev_male','pearson_female','stdev_female']].sort_values(by='auc',ascending=False)
+# phenotypes.columns = ['All','std_all','Male','std_male','Female','std_female']
+# phenotypes.index=phenotypes.index.map(lambda x: rename[x] if x in rename else '')#phenotypes.index.str.replace('bt__',"")
+# plt.text(-.6, 1.1, 'd', ha='center', va='center', transform=axd__binary_phenotypes.transAxes, fontsize=16)
+# ind = range(len(phenotypes))
+# estimation = phenotypes[['All','Male','Female']]
+# yerr = phenotypes[['std_all','std_male','std_female']].Tcompare_xgboostMB_Known.csv.values
+# estimation.plot.bar(yerr=yerr,ax = axd__binary_phenotypes,
+#                               zorder=1,#edgecolor='none',
+#                               color=three_colors,legend=False,
+#                               width=0.8)
+#
+# # axb__binary_phenotypes.bar(ind,phenotypes['auc'], yerr=phenotypes['stdev'], ecolor='black',
+# #        zorder=1,color=two_colors[0],align='center')
+# plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
+# axd__binary_phenotypes.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
+# axd__binary_phenotypes.spines['right'].set_visible(False)
+# axd__binary_phenotypes.spines['top'].set_visible(False)
+# plt.ylabel('AUC')
+# plt.xlabel('')
+# plt.ylim(0.5,1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+plt.savefig(os.path.join(FIGURES_DIR, 'figureS1_new.pdf'), bbox_inches='tight', format='pdf')
+plt.savefig(os.path.join(FIGURES_DIR, 'figureS1_new.png'), bbox_inches='tight', format='png')
