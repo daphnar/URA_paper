@@ -62,7 +62,7 @@ colors_rgb_bmi_hba1c = colors_rgb[:4]+[colors_rgb[-1]]
 
 outer_grid = gridspec.GridSpec(1,1)
 ax__ab = outer_grid[0,0]
-ab_grid = gridspec.GridSpecFromSubplotSpec(2,2, ax__ab, wspace=0.2, width_ratios=[17./21,4./21])
+ab_grid = gridspec.GridSpecFromSubplotSpec(2,2, ax__ab, hspace=1, wspace=0.2, width_ratios=[17./21,4./21])
 axa__quantitive_phenotypes = plt.subplot(ab_grid[1,0])
 axa__quantitive_phenotypes.set_zorder(1)
 axb__binary_phenotypes = plt.subplot(ab_grid[1,1])
