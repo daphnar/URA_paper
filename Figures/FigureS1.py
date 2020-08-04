@@ -69,8 +69,8 @@ axb__binary_phenotypes = plt.subplot(ab_grid[1,1])
 axb__binary_phenotypes.set_zorder(1)
 axc__quantitive_phenotypes = plt.subplot(ab_grid[0,0])
 axc__quantitive_phenotypes.set_zorder(1)
-#axd__binary_phenotypes = plt.subplot(ab_grid[0,1])
-#axd__binary_phenotypes.set_zorder(1)
+axd__binary_phenotypes = plt.subplot(ab_grid[0,1])
+axd__binary_phenotypes.set_zorder(1)
 
 
 
@@ -196,29 +196,32 @@ sns.despine(ax=axc__quantitive_phenotypes)
 plt.ylabel('$R^{2}$ (%)')
 plt.xlabel('')
 
-# plt.sca(axd__binary_phenotypes)
-# correlations_df = pd.read_csv(os.path.join(FIGURES_DIR,'Figures - classification.csv')).set_index('target')
-# phenotypes = correlations_df[['auc','stdev','pearson_male','stdev_male','pearson_female','stdev_female']].sort_values(by='auc',ascending=False)
-# phenotypes.columns = ['All','std_all','Male','std_male','Female','std_female']
-# phenotypes.index=phenotypes.index.map(lambda x: rename[x] if x in rename else '')#phenotypes.index.str.replace('bt__',"")
-# plt.text(-.6, 1.1, 'd', ha='center', va='center', transform=axd__binary_phenotypes.transAxes, fontsize=16)
-# ind = range(len(phenotypes))
-# estimation = phenotypes[['All','Male','Female']]
-# yerr = phenotypes[['std_all','std_male','std_female']].Tcompare_xgboostMB_Known.csv.values
-# estimation.plot.bar(yerr=yerr,ax = axd__binary_phenotypes,
-#                               zorder=1,#edgecolor='none',
-#                               color=three_colors,legend=False,
-#                               width=0.8)
-#
-# # axb__binary_phenotypes.bar(ind,phenotypes['auc'], yerr=phenotypes['stdev'], ecolor='black',
-# #        zorder=1,color=two_colors[0],align='center')
-# plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
-# axd__binary_phenotypes.tick_params(direction="outward",top='off',right='off',pad=2,labelsize=fontsize)
-# axd__binary_phenotypes.spines['right'].set_visible(False)
-# axd__binary_phenotypes.spines['top'].set_visible(False)
-# plt.ylabel('AUC')
-# plt.xlabel('')
-# plt.ylim(0.5,1)
+plt.sca(axd__binary_phenotypes)
+correlations_df = pd.read_csv(os.path.join(FIGURES_DIR,'compare_classifcation_Known.csv'),index_col=0)
+phenotypes = correlations_df[['mean_auc_Known','std_Known',
+'mean_auc_mpa','std_mpa','mean_auc_ura','std_ura']]\
+                              .dropna().sort_values(by='mean_auc_ura',ascending=False).mul(100)
+phenotypes.columns = ['URA known NCBI','std_Known',
+'MetaPhlan','std_mpa','URA expanded reference','std_ura']
+phenotypes.index=phenotypes.index.map(lambda x: rename[x] if x in rename else '')#phenotypes.index.str.replace('bt__',"")
+plt.text(-.6, 1.1, 'b', ha='center', va='center', transform=axd__binary_phenotypes.transAxes, fontsize=16)
+ind = range(len(phenotypes))
+estimation = phenotypes[['MetaPhlan','URA known NCBI','URA expanded reference']]
+yerr = phenotypes[['std_mpa','std_Known','std_ura']].T.values
+estimation.plot.bar(yerr=yerr,ax = axd__binary_phenotypes,
+                              zorder=1,#edgecolor='none',
+                              color=three_colors,legend=False,
+                              width=0.8)
+
+# axb__binary_phenotypes.bar(ind,phenotypes['auc'], yerr=phenotypes['stdev'], ecolor='black',
+#        zorder=1,color=two_colors[0],align='center')
+plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
+axd__binary_phenotypes.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
+axd__binary_phenotypes.spines['right'].set_visible(False)
+axd__binary_phenotypes.spines['top'].set_visible(False)
+plt.ylabel('AUC')
+plt.xlabel('')
+plt.ylim(0.5,1)
 
 
 
