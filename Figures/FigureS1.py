@@ -200,7 +200,7 @@ plt.sca(axd__binary_phenotypes)
 correlations_df = pd.read_csv(os.path.join(FIGURES_DIR,'compare_classifcation_Known.csv'),index_col=0)
 phenotypes = correlations_df[['mean_auc_Known','std_Known',
 'mean_auc_mpa','std_mpa','mean_auc_ura','std_ura']]\
-                              .dropna().sort_values(by='mean_auc_ura',ascending=False).mul(100)
+                              .dropna().sort_values(by='mean_auc_ura',ascending=False)
 phenotypes.columns = ['URA known NCBI','std_Known',
 'MetaPhlan','std_mpa','URA expanded reference','std_ura']
 phenotypes.index=phenotypes.index.map(lambda x: rename[x] if x in rename else '')#phenotypes.index.str.replace('bt__',"")
@@ -216,9 +216,10 @@ estimation.plot.bar(yerr=yerr,ax = axd__binary_phenotypes,
 # axb__binary_phenotypes.bar(ind,phenotypes['auc'], yerr=phenotypes['stdev'], ecolor='black',
 #        zorder=1,color=two_colors[0],align='center')
 plt.xticks(ind,phenotypes.index,rotation=45,ha='right')
-axd__binary_phenotypes.tick_params(top='off',right='off',pad=2,labelsize=fontsize)
-axd__binary_phenotypes.spines['right'].set_visible(False)
-axd__binary_phenotypes.spines['top'].set_visible(False)
+axc__quantitive_phenotypes.tick_params(top='off',right='off',pad=0,labelsize=fontsize)
+axc__quantitive_phenotypes.yaxis.set_ticks_position('left')
+axc__quantitive_phenotypes.xaxis.set_ticks_position('bottom')
+sns.despine(ax=axc__quantitive_phenotypes)
 plt.ylabel('AUC')
 plt.xlabel('')
 plt.ylim(0.5,1)
