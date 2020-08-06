@@ -13,6 +13,7 @@ from scipy.stats import gaussian_kde,spearmanr
 from sklearn.metrics import r2_score
 #FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/figures'
 FIGURES_DIR = '/net/mraid08/export/jafar/Microbiome/Analyses/Unicorn/Cohort_Paper/revision_Analyses/figures'
+
 num_bacs = 3
 
 plt.figure(figsize=(nature_guidline_utils.two_columns(),
@@ -61,7 +62,9 @@ def keepname(name,return_sgb):
                      '10115': 'K. pneumoniae',
                      '4705': 'Clostridium sp',
                      '15369': 'Faecalibacterium sp',
-                     '4964' : 'Unknown Eubacteriaceae'}
+                     '4964' : 'Unknown Eubacteriaceae',
+                     '14311' : 'Unknown Clostridiaceae'}
+                     # '8069' : 'S. parasanguinis'}
     if sgb in corrected_names.keys():
         name =corrected_names[sgb]
     else:
@@ -111,7 +114,7 @@ plt.text(-0.15, 1.1, 'a', ha='center', va='center', transform=d_ax.transAxes, fo
 plt.title('Age',fontsize=10)
 def_data= pd.read_csv(os.path.join(FIGURES_DIR, 'Figures - il_vs_us_sgb_pvals.csv'))
 def_data=def_data.set_index('species')
-pheno_data=def_data[def_data['pheno']=='age'][['spear','spear_us','spear_pval']].dropna()
+pheno_data=def_data[def_data['pheno']=='age']
 pheno_data=pheno_data.sort_values('spear_pval')
 bacteria = pheno_data.index.values
 plt.scatter(pheno_data.loc[bacteria,'spear'],pheno_data.loc[bacteria,'spear_us'],# c=colors[1],
@@ -124,26 +127,31 @@ d_ax.annotate('R=%.2f\n'
 
 plt.xlabel('Train-IL\nSpearmann correlation')
 plt.ylabel('Test2-US\nSpearmann correlation')
-for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs+1]]):
-    it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
+for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs+2]]):
     if txt=='?':
         continue
-    elif txt=='V. atypica':
-        t = plt.gca().annotate(it_text,
-                 (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.02,
-        pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.015),
-                  fontsize=8)
+    # elif txt=='V. atypica':
+    #     t = plt.gca().annotate(txt,
+    #              (pheno_data.loc[bacteria, 'spear'].iloc[i],# - 0.02,
+    #     pheno_data.loc[bacteria, 'spear_us'].iloc[i]),# - 0.035),
+    #               fontsize=8)
         # t.set_bbox(dict(facecolor='red', alpha=0.5, edgecolor='red'))
+    elif txt == 'Blautia sp':
+        plt.gca().annotate(txt,
+                           (pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.015,
+                            pheno_data.loc[bacteria, 'spear_us'].iloc[i] - 0.04),  # - 0.01),
+                           fontsize=8)
     else:
-        plt.gca().annotate(it_text,
-                       (pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.02,
-                        pheno_data.loc[bacteria, 'spear_us'].iloc[i] - 0.01),
+        plt.gca().annotate(txt,
+                       (pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.015,
+                        pheno_data.loc[bacteria, 'spear_us'].iloc[i]),# - 0.01),
                        fontsize=8)
-    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0])
+    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
+                edgecolors='k')
 
 d_ax.tick_params(axis='both', which='major', pad=3)
-plt.xlim(-0.20,0.20)
-plt.ylim(-0.20,0.20)
+# plt.xlim(-0.20,0.20)
+# plt.ylim(-0.20,0.20)
 plt.xticks([-0.20,0,0.20])
 d_ax.set_xticklabels(["-0.2","0","0.2"])
 plt.yticks([-0.2,0,0.2])
@@ -154,32 +162,36 @@ plt.text(-0.15, 1.1, 'b', ha='center', va='center', transform=e_ax.transAxes, fo
 plt.title('HbA1C%',fontsize=10)
 def_data= pd.read_csv(os.path.join(FIGURES_DIR, 'Figures - il_vs_us_sgb_pvals.csv'))
 def_data=def_data.set_index('species')
-pheno_data=def_data[def_data['pheno']=='hba1c'][['spear','spear_us','spear_pval']].dropna()
+pheno_data=def_data[def_data['pheno']=='hba1c']
 pheno_data=pheno_data.sort_values('spear_pval')
 bacteria = pheno_data.index.values
 plt.scatter(pheno_data.loc[bacteria,'spear'],pheno_data.loc[bacteria,'spear_us'],
             c=np.log10(pheno_data['spear_pval']), cmap=plt.cm.get_cmap('RdBu'),
             norm=mpl.colors.Normalize(vmin=-20, vmax=0,clip=True),
             edgecolor='',alpha=0.5)
-r=spearmanr(pheno_data.loc[bacteria,'spear'],pheno_data.loc[bacteria,'spear_us'])
+keep_rev=pheno_data.loc[bacteria,'spear_us'].dropna().index
+#r=spearmanr(pheno_data.loc[bacteria,'spear'].dropna(),pheno_data.loc[bacteria,'spear_us'])
+r=spearmanr(pheno_data.loc[keep_rev,'spear'].dropna(),pheno_data.loc[keep_rev,'spear_us'])
 e_ax.annotate('R=%.2f\n'
-              r'P<$10^{%d}$'%(r[0],np.log10(r[1])-1),(-.18,0.17),fontsize=8)
+              r'P<$10^{%d}$'%(r[0],int(np.log10(r[1])-1)),(-.18,0.17),fontsize=8)
 plt.xlabel('Train-IL\nSpearmann correlation')
 for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
-    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0])
-    it_text = ' '.join(['$\it{%s}$' %t for t in txt.split(' ')])
-    if txt=='K. pneumoniae' or txt=='E. marmotae':
-        plt.gca().annotate(it_text,
-                           (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
-                            pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.031),
+    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
+                edgecolors='k')
+    # if txt=='K. pneumoniae' or
+    #
+    if txt=='E. marmotae':
+        plt.gca().annotate(txt,
+                           (pheno_data.loc[bacteria, 'spear'].iloc[i],# - 0.07,
+                            pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.045),
                            fontsize=8)
     else:
-        plt.gca().annotate(it_text,
-        (pheno_data.loc[bacteria, 'spear'].iloc[i],
-        pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.015),fontsize=8)
+        plt.gca().annotate(txt,
+        (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.02,
+        pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.018),fontsize=8)
 e_ax.tick_params(axis='both', which='major', pad=3)
-plt.xlim(-0.2,0.2)
-plt.ylim(-0.2,0.2)
+# plt.xlim(-0.2,0.2)
+# plt.ylim(-0.2,0.2)
 plt.xticks([-0.2,0,0.25])
 e_ax.set_xticklabels(["-0.2","0","0.25"])
 plt.yticks([-0.2,0,0.25])
@@ -191,7 +203,7 @@ plt.text(-0.15, 1.1, 'c', ha='center', va='center', transform=f_ax.transAxes, fo
 plt.title('BMI',fontsize=10)
 def_data= pd.read_csv(os.path.join(FIGURES_DIR, 'Figures - il_vs_us_sgb_pvals.csv'))
 def_data=def_data.set_index('species')
-pheno_data=def_data[def_data['pheno']=='bmi'][['spear','spear_us','spear_pval']].dropna()
+pheno_data=def_data[def_data['pheno']=='bmi']
 pheno_data=pheno_data.sort_values('spear_pval')
 bacteria = pheno_data.index.values
 plt.scatter(pheno_data.loc[bacteria,'spear'],pheno_data.loc[bacteria,'spear_us'],
@@ -203,22 +215,24 @@ f_ax.annotate('R=%.2f\n'
               r'P<$10^{%d}}$'%(r[0],np.log10(r[1])-1),(-.23,0.12),fontsize=8)
 plt.xlabel('Train-IL\nSpearmann correlation')
 for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
-    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0])
+    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
+                edgecolors='k')
     # plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i]+0.01, pheno_data.loc[bacteria, 'spear_us'].iloc[i]),
     #                    fontsize=8)
-    it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
+    if txt=='?':
+        continue
     if txt=='Faecalibacterium sp':
-        plt.gca().annotate(it_text, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
-        pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.033), fontsize=8)
+        plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
+        pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.04), fontsize=8)
     elif txt=='Clostridium sp':
-        plt.gca().annotate(it_text, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.11,
+        plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.11,
         pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.02), fontsize=8)
     else:
-        plt.gca().annotate(it_text,(pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.01,
-        pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.01), fontsize=8)
+        plt.gca().annotate(txt,(pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
+        pheno_data.loc[bacteria, 'spear_us'].iloc[i] - 0.04), fontsize=8)
 f_ax.tick_params(axis='both', which='major', pad=3)
-plt.xlim(-0.25,0.2)
-plt.ylim(-0.25,0.2)
+# plt.xlim(-0.25,0.2)
+# plt.ylim(-0.25,0.2)
 plt.xticks([-0.25,0,0.2])
 f_ax.set_xticklabels(["-0.25","0","0.2"])
 plt.yticks([-0.25,0,0.2])
@@ -245,6 +259,7 @@ for item in ([f_ax.xaxis.label, f_ax.yaxis.label]):
 
 def_data= pd.read_csv(os.path.join(FIGURES_DIR, 'Figures - il_vs_us_spearman_saturation.csv'))
 
+
 d_ax = plt.subplot(def_grid[0,0])
 plt.sca(d_ax)
 plt.title('Age',fontsize=10)
@@ -256,9 +271,9 @@ d_ax.spines['top'].set_visible(False)
 d_ax.tick_params(top=False, right=False)
 plt.xticks([0,2000,4000])
 plt.xlim([0,4000])
-plt.ylim([0,0.55])
-plt.yticks([0,0.25,0.5])
-d_ax.set_yticklabels(['0','0.25','0.5'])
+plt.ylim([0,0.6])
+plt.yticks([0,0.3,0.6])
+d_ax.set_yticklabels(['0','0.3','0.6'])
 plt.xlabel('Cohort sizes (IL & US)')
 plt.ylabel('Spearman correlation\nbetween cohorts')
 
@@ -272,9 +287,9 @@ e_ax.spines['right'].set_visible(False)
 e_ax.spines['top'].set_visible(False)
 e_ax.tick_params(top=False, right=False)
 plt.xticks([0,1000,2000])
-plt.xlim([0,2200])
-plt.yticks([0,0.17,0.35])
-e_ax.set_yticklabels(['0','0.17','0.35'])
+plt.xlim([0,2300])
+plt.yticks([0,0.25,0.5])
+e_ax.set_yticklabels(['0','0.25','0.5'])
 plt.xlabel('Cohort sizes (IL & US)')
 
 f_ax = plt.subplot(def_grid[0,2])
