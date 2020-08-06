@@ -67,5 +67,5 @@ def merge_on_target(dfs,output):
         merged = merged.merge(df,on='target')
     merged.to_csv(output)
 
-#merger_quantitive()
+merger_quantitive()
 merger_binary()
