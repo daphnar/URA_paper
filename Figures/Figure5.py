@@ -128,6 +128,7 @@ d_ax.annotate('R=%.2f\n'
 plt.xlabel('Train-IL\nSpearmann correlation')
 plt.ylabel('Test2-US\nSpearmann correlation')
 for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs+2]]):
+    it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
     if txt=='?':
         continue
     # elif txt=='V. atypica':
@@ -137,12 +138,12 @@ for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs+2]])
     #               fontsize=8)
         # t.set_bbox(dict(facecolor='red', alpha=0.5, edgecolor='red'))
     elif txt == 'Blautia sp':
-        plt.gca().annotate(txt,
+        plt.gca().annotate(it_text,
                            (pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.015,
                             pheno_data.loc[bacteria, 'spear_us'].iloc[i] - 0.04),  # - 0.01),
                            fontsize=8)
     else:
-        plt.gca().annotate(txt,
+        plt.gca().annotate(it_text,
                        (pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.015,
                         pheno_data.loc[bacteria, 'spear_us'].iloc[i]),# - 0.01),
                        fontsize=8)
@@ -176,17 +177,18 @@ e_ax.annotate('R=%.2f\n'
               r'P<$10^{%d}$'%(r[0],int(np.log10(r[1])-1)),(-.18,0.17),fontsize=8)
 plt.xlabel('Train-IL\nSpearmann correlation')
 for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
+    it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
     plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
                 edgecolors='k')
     # if txt=='K. pneumoniae' or
     #
     if txt=='E. marmotae':
-        plt.gca().annotate(txt,
+        plt.gca().annotate(it_text,
                            (pheno_data.loc[bacteria, 'spear'].iloc[i],# - 0.07,
                             pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.045),
                            fontsize=8)
     else:
-        plt.gca().annotate(txt,
+        plt.gca().annotate(it_text,
         (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.02,
         pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.018),fontsize=8)
 e_ax.tick_params(axis='both', which='major', pad=3)
@@ -215,6 +217,7 @@ f_ax.annotate('R=%.2f\n'
               r'P<$10^{%d}}$'%(r[0],np.log10(r[1])-1),(-.23,0.12),fontsize=8)
 plt.xlabel('Train-IL\nSpearmann correlation')
 for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
+    it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
     plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
                 edgecolors='k')
     # plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i]+0.01, pheno_data.loc[bacteria, 'spear_us'].iloc[i]),
@@ -222,13 +225,13 @@ for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
     if txt=='?':
         continue
     if txt=='Faecalibacterium sp':
-        plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
+        plt.gca().annotate(it_text, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
         pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.04), fontsize=8)
     elif txt=='Clostridium sp':
-        plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.11,
+        plt.gca().annotate(it_text, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.11,
         pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.02), fontsize=8)
     else:
-        plt.gca().annotate(txt,(pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
+        plt.gca().annotate(it_text,(pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
         pheno_data.loc[bacteria, 'spear_us'].iloc[i] - 0.04), fontsize=8)
 f_ax.tick_params(axis='both', which='major', pad=3)
 # plt.xlim(-0.25,0.2)
