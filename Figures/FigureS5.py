@@ -50,16 +50,16 @@ def colorbar(ax):
 def keepname(name,return_sgb):
     name = name.split('|')
     sgb = name[-1][6:]
-    corrected_names={'6936':'V. atypica',
-                     '4826': 'Blautia sp',
-                     '17244': 'B. adolescentis',
-                     '10068': 'E. coli',
-                     '10064': 'E. marmotae',
-                     '10115': 'K. pneumoniae',
-                     '4705': 'Clostridium sp',
-                     '15369': 'Faecalibacterium sp',
-                     '4964' : 'Unknown Eubacteriaceae',
-                     '8069' : 'S. parasanguinis'}
+    corrected_names = {'6936': 'V. atypica',
+                       '4826': 'Blautia sp',
+                       '17244': 'B. adolescentis',
+                       '10068': 'E. coli',
+                       '10064': 'E. marmotae',
+                       '10115': 'K. pneumoniae',
+                       '4705': 'Clostridium sp',
+                       '15369': 'Faecalibacterium sp',
+                       '4964': 'Unknown Eubacteriaceae',
+                       '14311': 'Unknown Clostridiaceae'}
     if sgb in corrected_names.keys():
         name =corrected_names[sgb]
     else:
@@ -122,22 +122,17 @@ plt.yticks([-0.2,0,0.2])
 d_ax.set_yticklabels(["-0.2","0","0.2"])
 plt.xlabel('Train-IL\nSpearmann correlation')
 plt.ylabel('Test2-US\nSpearmann correlation')
-for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs+1]]):
+for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria]):
     it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
-    if txt=='?':
-        continue
-    elif txt=='S. parasanguinis':
-        t = plt.gca().annotate(it_text,
-                 (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.11,
-        pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.015),
-                  fontsize=8)
-        # t.set_bbox(dict(facecolor='red', alpha=0.5, edgecolor='red'))
-    else:
+    # if txt=='?':
+    #     continue
+    if (txt=='V. atypica') or (txt=='E. coli') or (txt== 'Blautia sp'):
         plt.gca().annotate(it_text,
                        (pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.02,
                         pheno_data.loc[bacteria, 'spear_us'].iloc[i] - 0.01),
                        fontsize=8)
-    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0])
+        plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
+                edgecolors='k')
 e_ax = plt.subplot(abc_grid[0,1])
 plt.sca(e_ax)
 plt.text(-0.15, 1.1, 'b', ha='center', va='center', transform=e_ax.transAxes, fontsize=16)
@@ -156,7 +151,8 @@ e_ax.annotate('R=%.2f\n'
               r'P<$10^{%d}$'%(r[0],np.log10(r[1])-1),(-.15,0.18),fontsize=8)
 plt.xlabel('Train-IL\nSpearmann correlation')
 for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
-    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0])
+    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
+                edgecolors='k')
     it_text = ' '.join(['$\it{%s}$' %t for t in txt.split(' ')])
     if txt=='E. marmotae':
         plt.gca().annotate(it_text,
@@ -192,19 +188,32 @@ r=spearmanr(pheno_data['spear'],pheno_data['spear_us'])
 f_ax.annotate('R=%.2f\n'
               r'P<$10^{%d}}$'%(r[0],np.log10(r[1])-1),(-.175,0.14),fontsize=8)
 plt.xlabel('Train-IL\nSpearmann correlation')
-for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria[:num_bacs]]):
-    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0])
-    # plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i]+0.01, pheno_data.loc[bacteria, 'spear_us'].iloc[i]),
-    #                    fontsize=8)
+for i, txt in enumerate([keepname(sgb, False) for sgb in bacteria]):
     it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
-    if txt=='K. pneumoniae' or txt=='E. marmotae':
-        plt.gca().annotate(it_text,
-                           (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
-                            pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.03),
-                           fontsize=8)
+    if txt=='?':
+        continue
+    print(txt)
+    if txt=='Clostridium sp':
+        plt.gca().annotate(it_text, (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.11,
+        pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.02), fontsize=8)
+    elif (txt=='Unknown Clostridiaceae') or (txt=='Unknown Eubacteriaceae'):
+        plt.gca().annotate(it_text,(pheno_data.loc[bacteria, 'spear'].iloc[i],# - 0.07,
+        pheno_data.loc[bacteria, 'spear_us'].iloc[i]),fontsize=8)# - 0.04), fontsize=8)
     else:
-        plt.gca().annotate(it_text,(pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.01,
-        pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.01), fontsize=8)
+        continue
+    plt.scatter(pheno_data.loc[bacteria[i], 'spear'], pheno_data.loc[bacteria[i], 'spear_us'], c=colors[0],
+                edgecolors='k')
+    # # plt.gca().annotate(txt, (pheno_data.loc[bacteria, 'spear'].iloc[i]+0.01, pheno_data.loc[bacteria, 'spear_us'].iloc[i]),
+    # #                    fontsize=8)
+    # it_text = ' '.join(['$\it{%s}$' % t for t in txt.split(' ')])
+    # if txt=='K. pneumoniae' or txt=='E. marmotae':
+    #     plt.gca().annotate(it_text,
+    #                        (pheno_data.loc[bacteria, 'spear'].iloc[i] - 0.07,
+    #                         pheno_data.loc[bacteria, 'spear_us'].iloc[i]-0.03),
+    #                        fontsize=8)
+    # else:
+    #     plt.gca().annotate(it_text,(pheno_data.loc[bacteria, 'spear'].iloc[i] + 0.01,
+    #     pheno_data.loc[bacteria, 'spear_us'].iloc[i] + 0.01), fontsize=8)
 f_ax.tick_params(axis='both', which='major', pad=3)
 # plt.xlim(-0.25,0.2)
 # plt.ylim(-0.25,0.2)
